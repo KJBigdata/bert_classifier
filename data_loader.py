@@ -1,5 +1,9 @@
+import os
 import torch
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
+
+def mkdir(path: str):
+    os.makedirs(path, exist_ok=True)
 
 def load_nsmc_set():
     import pandas as pd
@@ -8,7 +12,7 @@ def load_nsmc_set():
 
     return train, test
 
-def convert_to_tensor(inputs, labels, masks, batch_size = 4):
+def convert_to_tensor(inputs, labels, masks, batch_size = 32):
     tensor_inputs = torch.tensor(inputs)
     tensor_labels = torch.tensor(labels)
     tensor_masks = torch.tensor(masks)

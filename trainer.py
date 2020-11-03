@@ -7,7 +7,7 @@ import random
 
 from transformers import BertForSequenceClassification, AdamW, BertConfig
 from transformers import get_linear_schedule_with_warmup
-from data_loader import convert_to_tensor
+from data_loader import mkdir, convert_to_tensor
 
 # 정확도 계산 함수
 def flat_accuracy(preds, labels):
@@ -123,6 +123,9 @@ class Classifier:
                 # 그래디언트 초기화
                 self.model.zero_grad()
 
+            mkdir('./model')
+            torch.save(self.model.state_dict(), 'model/finetuned_model')
+
             # 평균 로스 계산
             avg_train_loss = total_loss / len(self.train_dataloader)
             torch.save(self.model.load_state_dict(), './model')
@@ -133,7 +136,6 @@ class Classifier:
             # ========================================
             #               Validation
             # ========================================
-
             print("")
             print("Running Validation...")
 
