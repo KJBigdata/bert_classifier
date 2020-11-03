@@ -3,8 +3,8 @@ from torch.utils.data import TensorDataset, DataLoader, RandomSampler, Sequentia
 
 def load_nsmc_set():
     import pandas as pd
-    train = pd.read_csv("nsmc/ratings_train.txt", sep='\t')
-    test = pd.read_csv("nsmc/ratings_test.txt", sep='\t')
+    train = pd.read_csv("data/ratings_train.txt", sep='\t')
+    test = pd.read_csv("data/ratings_test.txt", sep='\t')
 
     return train, test
 
