@@ -1,9 +1,11 @@
-import tensorflow as tf
-import torch
+import os
 import numpy as np
 import datetime
 import time
 import random
+
+import tensorflow as tf
+import torch
 
 from transformers import BertForSequenceClassification, AdamW, BertConfig
 from transformers import get_linear_schedule_with_warmup
@@ -123,12 +125,14 @@ class Classifier:
                 # 그래디언트 초기화
                 self.model.zero_grad()
 
-            mkdir('./model')
-            torch.save(self.model.state_dict(), 'model/finetuned_model')
+            model_path = './model'
+            model_name = 'finetuned'
+            mkdir(model_path)
+            torch.save(self.model.state_dict(), os.path.join(model_path, model_name))
 
             # 평균 로스 계산
             avg_train_loss = total_loss / len(self.train_dataloader)
-            torch.save(self.model.load_state_dict(), './model')
+
             print("")
             print("  Average training loss: {0:.2f}".format(avg_train_loss))
             print("  Training epcoh took: {:}".format(format_time(time.time() - t0)))
