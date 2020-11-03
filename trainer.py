@@ -9,15 +9,6 @@ from transformers import BertForSequenceClassification, AdamW, BertConfig
 from transformers import get_linear_schedule_with_warmup
 from data_loader import convert_to_tensor
 
-# 디바이스 설정
-if torch.cuda.is_available():
-    device = torch.device("cuda")
-    print('There are %d GPU(s) available.' % torch.cuda.device_count())
-    print('We will use the GPU:', torch.cuda.get_device_name(0))
-else:
-    device = torch.device("cpu")
-    print('No GPU available, using the CPU instead.')
-
 # 정확도 계산 함수
 def flat_accuracy(preds, labels):
     pred_flat = np.argmax(preds, axis=1).flatten()
@@ -35,8 +26,9 @@ class Classifier:
     def __init__(self, train_inputs, train_labels, train_masks,
                  eval_inputs, eval_labels, eval_masks):
         # 분류를 위한 BERT 모델 생성
+        self.device = torch.device("cpu")
         self.model = BertForSequenceClassification.from_pretrained("bert-base-multilingual-cased", num_labels=2)
-        self.model.cuda()
+        self.model.to(self.device)
 
         self.train_dataloader = convert_to_tensor(train_inputs, train_labels, train_masks)
         self.validation_dataloader = convert_to_tensor(eval_inputs, eval_labels, eval_masks)
@@ -96,23 +88,20 @@ class Classifier:
                     print('  Batch {:>5,}  of  {:>5,}.    Elapsed: {:}.'.format(step, len(self.train_dataloader), elapsed))
 
                 # 배치를 GPU에 넣음
-                batch = tuple(t.to(device) for t in batch)
+                batch = tuple(t.to(self.device) for t in batch)
 
                 # 배치에서 데이터 추출
                 b_input_ids, b_input_mask, b_labels = batch
-                b_input_ids = b_input_ids.type(torch.LongTensor)
-                b_input_mask = b_input_mask.type(torch.LongTensor)
-                b_labels = b_labels.type(torch.LongTensor)
 
-                b_input_ids = b_input_ids.to(device)
-                b_input_mask = b_input_mask.to(device)
-                b_labels = b_labels.to(device)
+                b_input_ids = b_input_ids.to(self.device)
+                b_input_mask = b_input_mask.to(self.device)
+                b_labels = b_labels.to(self.device)
                 # Forward 수행
                 outputs = self.model(b_input_ids,
                                      token_type_ids=None,
                                      attention_mask=b_input_mask,
                                      labels=b_labels)
-
+                print(outputs)
                 # 로스 구함
                 loss = outputs[0]
 
@@ -161,7 +150,7 @@ class Classifier:
             # 데이터로더에서 배치만큼 반복하여 가져옴
             for batch in self.validation_dataloader:
                 # 배치를 GPU에 넣음
-                batch = tuple(t.to(device) for t in batch)
+                batch = tuple(t.to(self.device) for t in batch)
 
                 # 배치에서 데이터 추출
                 b_input_ids, b_input_mask, b_labels = batch
