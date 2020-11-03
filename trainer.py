@@ -125,7 +125,7 @@ class Classifier:
 
             # 평균 로스 계산
             avg_train_loss = total_loss / len(self.train_dataloader)
-
+            torch.save(self.model.load_state_dict(), './model')
             print("")
             print("  Average training loss: {0:.2f}".format(avg_train_loss))
             print("  Training epcoh took: {:}".format(format_time(time.time() - t0)))
